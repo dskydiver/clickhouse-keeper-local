@@ -1,0 +1,67 @@
+version: '3.7'
+
+x-clickhouse-defaults: &clickhouse-defaults
+  restart: unless-stopped
+  image: clickhouse/clickhouse-server:latest
+  environment:
+    CLICKHOUSE_USER: devuser
+    CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    CLICKHOUSE_PASSWORD: password
+  ulimits:
+    nproc: 65535
+    nofile:
+      soft: 262144
+      hard: 262144
+
+services:
+  clickhouse-1:
+    <<: *clickhouse-defaults
+    container_name: clickhouse-1
+    ports:
+      - 9000:9000
+      - 8123:8123
+      - 9181:9181
+    volumes:
+      - type: volume
+        source: clickhouse-1-data
+        target: /var/lib/clickhouse
+      - './configs/gen/clickhouse-1:/etc/clickhouse-server/config.d/'
+      - './configs/initdb.sql:/docker-entrypoint-initdb.d/init.sql'
+    networks:
+      - backend
+
+  clickhouse-2:
+    <<: *clickhouse-defaults
+    container_name: clickhouse-2
+    ports:
+      - 9001:9000
+      - 8124:8123
+      - 9182:9181
+    volumes:
+      - type: volume
+        source: clickhouse-2-data
+        target: /var/lib/clickhouse
+      - './configs/gen/clickhouse-2:/etc/clickhouse-server/config.d/'
+    networks:
+      - backend
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql-staging
+    command: --default-authentication-plugin=caching_sha2_password
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_USER: dev_user
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: afterlib-local
+    ports:
+      - 3306:3306
+    networks:
+      - backend
+
+volumes:
+  clickhouse-1-data:
+  clickhouse-2-data:
+
+networks:
+  backend:

@@ -1,0 +1,1 @@
+CREATE DATABASE afterlib_v2 ON CLUSTER 'afterlib_cluster';
