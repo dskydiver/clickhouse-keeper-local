@@ -1,1 +1,1 @@
-CREATE DATABASE afterlib_v2 ON CLUSTER 'afterlib_cluster';
+CREATE DATABASE IF NOT EXISTS afterlib_v2 ON CLUSTER 'afterlib_cluster';
